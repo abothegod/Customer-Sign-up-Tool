@@ -1,70 +1,189 @@
-# Getting Started with Create React App
+# Hotel Management Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based hotel management application for tracking guest check-ins and check-outs. This application uses Firebase for authentication and data storage, and includes features for adding customers manually or extracting data from images using the Gemini API.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Firebase authentication (anonymous sign-in)
+- Customer data management (add, edit, delete)
+- Image-based data extraction using Gemini API
+- CSV import/export functionality
+- Customer filtering by various fields
+- Responsive design with Tailwind CSS
 
-### `npm start`
+## Prerequisites
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Before you begin, ensure you have the following:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- [Node.js](https://nodejs.org/) (v14 or later)
+- A [Firebase](https://firebase.google.com/) account
+- A [Google Cloud](https://cloud.google.com/) account for Gemini API access
 
-### `npm test`
+## Setup Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Clone the repository
 
-### `npm run build`
+```bash
+git clone https://github.com/yourusername/hotel-management-app.git
+cd hotel-management-app
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. Install dependencies
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```bash
+npm install
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 3. Set up Firebase
 
-### `npm run eject`
+1. Go to the [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project
+3. Set up Firestore Database
+   - Create a database in test mode
+   - Set up the following collection structure: `hotels/{projectId}/customers`
+4. Set up Authentication
+   - Enable Anonymous authentication
+5. Go to Project Settings > General
+   - Scroll down to "Your apps" section
+   - Click the web icon (</>) to add a web app
+   - Register your app with a nickname
+   - Copy the Firebase configuration object
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 4. Configure the application
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Open `src/firebase-config.js` and replace the placeholder values with your Firebase configuration:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```javascript
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+2. Open `src/App.js` and replace the placeholder project ID with your Firebase project ID:
 
-## Learn More
+```javascript
+// Find this line in the useEffect hook
+const appId = "YOUR_PROJECT_ID";
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 5. Set up Gemini API (for image data extraction)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. Go to the [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create an API key
+3. Open `src/App.js` and find the `handleExtractDataFromImage` function
+4. Replace the placeholder API key with your Gemini API key:
 
-### Code Splitting
+```javascript
+const apiKey = "YOUR_GEMINI_API_KEY";
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Running the Application
 
-### Analyzing the Bundle Size
+### Development Mode
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+To run the application in development mode:
 
-### Making a Progressive Web App
+```bash
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+This will start the development server and open the application in your default browser at [http://localhost:3000](http://localhost:3000).
 
-### Advanced Configuration
+The page will automatically reload when you make changes to the code, and you'll see any lint errors in the console.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Production Build
 
-### Deployment
+To create a production build:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```bash
+npm run build
+```
 
-### `npm run build` fails to minify
+This creates an optimized build in the `build` folder that you can deploy to any static hosting service.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+To test the production build locally, you can use a simple HTTP server:
+
+```bash
+npm install -g serve
+serve -s build
+```
+
+## How Data is Stored and Retrieved
+
+### Data Storage Architecture
+
+This application uses Firebase Firestore as its database. The data is organized as follows:
+
+- **Collection Path**: `hotels/{projectId}/customers`
+  - Where `{projectId}` is your Firebase project ID
+  - Each document in the `customers` collection represents a single hotel guest
+
+### Data Flow
+
+1. **Authentication**: When the app starts, it authenticates anonymously with Firebase
+2. **Data Retrieval**: After authentication, the app sets up a real-time listener to the customers collection
+   - Changes to the database are immediately reflected in the UI without requiring a page refresh
+   - This is handled by the `onSnapshot` listener in the main useEffect hook
+
+3. **Adding Data**: When a user adds a new customer:
+   - The form data is collected and validated
+   - A new document is created in the `customers` collection using `addDoc`
+   - The document ID is automatically generated by Firebase
+
+4. **Updating Data**: When editing a customer:
+   - The existing document is updated using `updateDoc`
+   - Only the fields that are changed are sent to the database
+
+5. **Deleting Data**: When deleting a customer:
+   - The document is removed from the collection using `deleteDoc`
+
+6. **Batch Operations**: When importing data from CSV:
+   - Multiple documents are created in a single transaction using `writeBatch`
+   - This ensures all records are added atomically (either all succeed or all fail)
+
+### Data Persistence
+
+- All data is stored in the cloud on Firebase servers
+- Data persists between sessions and across different devices
+- No local storage is used for customer data
+- Firebase handles synchronization and conflict resolution automatically
+
+## Usage
+
+### Adding Customers
+
+1. Fill in the customer details in the form on the left side
+2. Click "Add Customer"
+
+### Quick Add from Image
+
+1. Click "Choose Image" and select an image containing customer information
+2. Click "Extract Data"
+3. Review the extracted data and click "Save Customer"
+
+### Filtering Customers
+
+1. Use the filter fields to search for specific customers
+2. Click "Apply Filters" to update the list
+
+### Importing/Exporting Data
+
+1. To export data, select the fields you want to export and click "Export Filtered Data"
+2. To import data, click "Choose File" to select a CSV file, then click "Import Data"
+
+## Security Considerations
+
+For production use, consider the following security enhancements:
+
+1. Move API keys to environment variables or a server-side implementation
+2. Implement proper Firebase security rules
+3. Add more robust user authentication
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
